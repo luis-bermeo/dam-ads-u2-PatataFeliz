@@ -8,6 +8,7 @@ import javafx.scene.layout.GridPane;
 
 import java.util.function.Consumer;
 
+
 public class CambiarDisponibilidadView extends GridPane {
     public CambiarDisponibilidadView(ClubDeportivo club) {
         setPadding(new Insets(12));
