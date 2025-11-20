@@ -29,7 +29,6 @@ public class MainApp extends Application {
            showError("Error de conexion"+e.getMessage());
         }
 
-
         root = new BorderPane();
         root.setTop(buildMenuBar());
         status = new Label("Listo");
