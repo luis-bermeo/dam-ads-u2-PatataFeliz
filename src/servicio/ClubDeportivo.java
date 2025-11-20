@@ -11,8 +11,8 @@ public class ClubDeportivo {
    private Connection conexion;
 
     public ClubDeportivo() throws SQLException {
-        conexion= DriverManager.getConnection("jdbc:mysql://localhost:3306/club_dama",
-                                        "root","alumno");
+        conexion= DriverManager.getConnection("jdbc:mysql://localhost:3306/dama",
+                                        "root","0000");
     }
 
     public ArrayList<Socio> getSocios() {
