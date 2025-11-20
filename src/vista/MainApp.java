@@ -22,12 +22,9 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage)  {
-        try {
+
             club = new ClubDeportivo();
             showInfo("Conectado");
-        } catch (SQLException e) {
-           showError("Error de conexion"+ e.getMessage());
-        }
 
         root = new BorderPane();
         root.setTop(buildMenuBar());
