@@ -1,51 +1,49 @@
--- ===============================
---   BASE DE DATOS DAMA SPORTS
---   Autor: Luis & Javi
--- ===============================
+-- ========================================
+-- BASE DE DATOS DAMA SPORTS - FINAL
+-- Autores: Luis y Javi
+-- ========================================
 
--- Elimina la base si ya existe
 DROP DATABASE IF EXISTS dama;
-
--- Crea la base de datos
 CREATE DATABASE dama;
 USE dama;
 
 -- ---------- TABLA SOCIOS ----------
 CREATE TABLE socios (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        id_socio VARCHAR(50) PRIMARY KEY,
+                        dni VARCHAR(20) NOT NULL UNIQUE,
                         nombre VARCHAR(100) NOT NULL,
-                        email VARCHAR(150) NOT NULL UNIQUE,
-                        activo BOOLEAN DEFAULT TRUE,
-                        fecha_alta DATE NOT NULL
+                        apellidos VARCHAR(100),
+                        telefono VARCHAR(20),
+                        email VARCHAR(150) NOT NULL UNIQUE
 );
 
 -- ---------- TABLA PISTAS ----------
 CREATE TABLE pistas (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        nombre VARCHAR(100) NOT NULL UNIQUE,
-                        tipo ENUM('TENIS', 'PADEL', 'FUTBOL') NOT NULL,
-                        precio_base DECIMAL(10,2) NOT NULL
+                        id_pista VARCHAR(50) PRIMARY KEY,
+                        deporte VARCHAR(50) NOT NULL,
+                        descripcion VARCHAR(200),
+                        disponible BOOLEAN DEFAULT TRUE
 );
 
 -- ---------- TABLA RESERVAS ----------
 CREATE TABLE reservas (
-                          id INT AUTO_INCREMENT PRIMARY KEY,
-                          id_socio INT NOT NULL,
-                          id_pista INT NOT NULL,
-                          inicio DATETIME NOT NULL,
-                          fin DATETIME NOT NULL,
+                          id_reserva VARCHAR(50) PRIMARY KEY,
+                          id_socio VARCHAR(50) NOT NULL,
+                          id_pista VARCHAR(50) NOT NULL,
+                          fecha DATE NOT NULL,
+                          hora_inicio TIME NOT NULL,
+                          duracion_min INT NOT NULL,
                           precio DECIMAL(10,2) NOT NULL,
-                          CONSTRAINT fk_reserva_socio FOREIGN KEY (id_socio) REFERENCES socios(id),
-                          CONSTRAINT fk_reserva_pista FOREIGN KEY (id_pista) REFERENCES pistas(id)
+                          CONSTRAINT fk_reserva_socio FOREIGN KEY (id_socio) REFERENCES socios(id_socio),
+                          CONSTRAINT fk_reserva_pista FOREIGN KEY (id_pista) REFERENCES pistas(id_pista)
 );
 
 -- ---------- FUNCIÓN PARA CALCULAR PRECIO ----------
 DELIMITER $$
 
 CREATE FUNCTION fn_calcular_precio(
-    p_id_pista INT,
-    p_inicio DATETIME,
-    p_fin DATETIME
+    p_id_pista VARCHAR(50),
+    p_duracion_min INT
 )
     RETURNS DECIMAL(10,2)
     DETERMINISTIC
@@ -53,18 +51,16 @@ BEGIN
     DECLARE v_precio_base DECIMAL(10,2);
     DECLARE v_horas DECIMAL(10,2);
 
-    -- Obtiene precio base de la pista
-SELECT precio_base INTO v_precio_base
-FROM pistas
-WHERE id = p_id_pista;
+    SELECT 10 INTO v_precio_base -- Puedes ajustar según tu lógica o tabla
+    FROM pistas
+    WHERE id_pista = p_id_pista;
 
--- Calcula horas (mínimo 1)
-SET v_horas = TIMESTAMPDIFF(MINUTE, p_inicio, p_fin) / 60;
+    SET v_horas = p_duracion_min / 60;
     IF v_horas < 1 THEN
         SET v_horas = 1;
-END IF;
+    END IF;
 
-RETURN v_horas * v_precio_base;
+    RETURN v_horas * v_precio_base;
 END $$
 
 DELIMITER ;
@@ -73,29 +69,30 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE PROCEDURE sp_crear_reserva(
-    IN p_id_pista INT,
-    IN p_id_socio INT,
-    IN p_inicio DATETIME,
-    IN p_fin DATETIME,
+    IN p_id_reserva VARCHAR(50),
+    IN p_id_pista VARCHAR(50),
+    IN p_id_socio VARCHAR(50),
+    IN p_fecha DATE,
+    IN p_hora_inicio TIME,
+    IN p_duracion_min INT,
     OUT p_precio DECIMAL(10,2)
 )
 BEGIN
-    -- Calcula precio usando la función
-    SET p_precio = fn_calcular_precio(p_id_pista, p_inicio, p_fin);
+    SET p_precio = fn_calcular_precio(p_id_pista, p_duracion_min);
 
-    -- Inserta reserva
-INSERT INTO reservas(id_socio, id_pista, inicio, fin, precio)
-VALUES (p_id_socio, p_id_pista, p_inicio, p_fin, p_precio);
+    INSERT INTO reservas(
+        id_reserva, id_socio, id_pista, fecha, hora_inicio, duracion_min, precio
+    ) VALUES (p_id_reserva, p_id_socio, p_id_pista, p_fecha, p_hora_inicio, p_duracion_min, p_precio);
 END $$
 
 DELIMITER ;
 
 -- ---------- DATOS DE EJEMPLO ----------
-INSERT INTO pistas(nombre, tipo, precio_base) VALUES
-                                                  ('Pista Tenis 1', 'TENIS', 10),
-                                                  ('Pista Pádel 1', 'PADEL', 8),
-                                                  ('Pista Fútbol Sala', 'FUTBOL', 20);
+INSERT INTO socios(id_socio,dni,nombre,apellidos,telefono,email) VALUES
+                                                                     ('S001','12345678A','Juan','Pérez','600123456','juan@example.com'),
+                                                                     ('S002','87654321B','Ana','Gómez','600654321','ana@example.com');
 
-INSERT INTO socios(nombre, email, fecha_alta) VALUES
-                                                  ('Juan Pérez', 'juan@example.com', CURDATE()),
-                                                  ('Ana Gómez', 'ana@example.com', CURDATE());
+INSERT INTO pistas(id_pista,deporte,descripcion,disponible) VALUES
+                                                                ('P001','TENIS','Pista de tenis exterior',TRUE),
+                                                                ('P002','PADEL','Pista de pádel cubierta',TRUE),
+                                                                ('P003','FUTBOL','Pista de fútbol sala interior',TRUE);

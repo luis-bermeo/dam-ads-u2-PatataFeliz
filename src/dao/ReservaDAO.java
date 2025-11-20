@@ -32,7 +32,7 @@ public class ReservaDAO {
 
             while (rs.next()) {
                 Reserva r = new Reserva(
-                        rs.getString("id"),
+                        rs.getString("id_reserva"),
                         rs.getString("id_socio"),
                         rs.getString("id_pista"),
                         rs.getDate("inicio").toLocalDate(),
@@ -77,7 +77,7 @@ public class ReservaDAO {
      * @author Luis
      */
     public void delete(String id) throws SQLException {
-        String sql = "DELETE FROM reservas WHERE id=?";
+        String sql = "DELETE FROM reservas WHERE id_reserva=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 

@@ -30,7 +30,7 @@ public class SocioDAO {
 
             while (rs.next()) {
                 Socio s = new Socio(
-                        rs.getString("id"),
+                        rs.getString("id_socio"),
                         rs.getString("dni"),
                         rs.getString("nombre"),
                         rs.getString("apellidos"),
@@ -53,14 +53,14 @@ public class SocioDAO {
      * @author Luis
      */
     public Socio findById(String id) throws SQLException {
-        String sql = "SELECT * FROM socios WHERE id=?";
+        String sql = "SELECT * FROM socios WHERE id_socio=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return new Socio(
-                        rs.getString("id"),
+                        rs.getString("id_socio"),
                         rs.getString("dni"),
                         rs.getString("nombre"),
                         rs.getString("apellidos"),
@@ -81,7 +81,7 @@ public class SocioDAO {
      * @author Luis
      */
     public void insert(Socio socio) throws SQLException {
-        String sql = "INSERT INTO socios(id, dni, nombre, apellidos, telefono, email) VALUES(?,?,?,?,?,?)";
+        String sql = "INSERT INTO socios(id_socio, dni, nombre, apellidos, telefono, email) VALUES(?,?,?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -102,7 +102,7 @@ public class SocioDAO {
      * @author Luis
      */
     public void update(Socio socio) throws SQLException {
-        String sql = "UPDATE socios SET dni=?, nombre=?, apellidos=?, telefono=?, email=? WHERE id=?";
+        String sql = "UPDATE socios SET dni=?, nombre=?, apellidos=?, telefono=?, email=? WHERE id_socio=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -123,7 +123,7 @@ public class SocioDAO {
      * @author Luis
      */
     public void delete(String id) throws SQLException {
-        String sql = "DELETE FROM socios WHERE id=?";
+        String sql = "DELETE FROM socios WHERE id_socio=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 

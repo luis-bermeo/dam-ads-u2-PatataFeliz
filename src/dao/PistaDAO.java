@@ -30,9 +30,9 @@ public class PistaDAO {
 
             while (rs.next()) {
                 Pista p = new Pista(
-                        rs.getString("id"),
-                        rs.getString("tipo"),
-                        rs.getString("nombre"),
+                        rs.getString("id_pista"),
+                        rs.getString("deporte"),
+                        rs.getString("descripcion"),
                         rs.getBoolean("disponible")
                 );
                 pistas.add(p);
@@ -51,7 +51,7 @@ public class PistaDAO {
      * @author Luis
      */
     public Pista findById(String id) throws SQLException {
-        String sql = "SELECT * FROM pistas WHERE id=?";
+        String sql = "SELECT * FROM pistas WHERE id_pista=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -59,9 +59,9 @@ public class PistaDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return new Pista(
-                        rs.getString("id"),
-                        rs.getString("tipo"),
-                        rs.getString("nombre"),
+                        rs.getString("id_pista"),
+                        rs.getString("deporte"),
+                        rs.getString("descripcion"),
                         rs.getBoolean("disponible")
                 );
             }
@@ -76,7 +76,7 @@ public class PistaDAO {
      * @author Luis
      */
     public void insert(Pista pista) throws SQLException {
-        String sql = "INSERT INTO pistas(id, tipo, nombre, disponible) VALUES(?,?,?,?)";
+        String sql = "INSERT INTO pistas(id_pista, deporte, descripcion, disponible) VALUES(?,?,?,?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -95,7 +95,7 @@ public class PistaDAO {
      * @author Luis
      */
     public void update(Pista pista) throws SQLException {
-        String sql = "UPDATE pistas SET tipo=?, nombre=?, disponible=? WHERE id=?";
+        String sql = "UPDATE pistas SET deporte=?, descripcion=?, disponible=? WHERE id_pista=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -114,7 +114,7 @@ public class PistaDAO {
      * @author Luis
      */
     public void delete(String id) throws SQLException {
-        String sql = "DELETE FROM pistas WHERE id=?";
+        String sql = "DELETE FROM pistas WHERE id_pista=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
