@@ -72,6 +72,19 @@ public class ClubDeportivo {
         }
         socioDAO.insert(socio);
     }
+    
+    /**
+     * Da de alta una nueva pista en el club.
+     * @param pista pista a añadir
+     * @throws SQLException si ocurre un error en la base de datos
+     * @throws IllegalArgumentException si la pista ya existe
+     */
+    public void altaPista(Pista pista) throws SQLException {
+        if (pistaDAO.findById(pista.getIdPista()) != null) {
+            throw new IllegalArgumentException("La pista ya existe");
+        }
+        pistaDAO.insert(pista);
+    }
 
     /**
      * Da de baja un socio del club.
@@ -90,6 +103,15 @@ public class ClubDeportivo {
             throw new IllegalArgumentException("El socio tiene reservas futuras");
         }
         socioDAO.delete(idSocio);
+    }
+
+    /**
+     * Cambia el estado de disponibilidad de una pista.
+     * @param pista la pista a modificar
+     * @throws SQLException si ocurre un error en la base de datos
+     */
+    public void cambiarDisponibilidadPista(Pista pista) throws SQLException {
+        pistaDAO.update(pista);
     }
 
     /**
@@ -126,6 +148,15 @@ public class ClubDeportivo {
 
         // Crear reserva usando DAO y SP
         reservaDAO.crearReservaSP(reserva);
+    }
+
+    /**
+     * Cancela una reserva.
+     * @param idReserva id de la reserva a cancelar
+     * @throws SQLException si ocurre un error en la base de datos
+     */
+    public void cancelarReserva(String idReserva) throws SQLException {
+        reservaDAO.delete(idReserva);
     }
 
     /**

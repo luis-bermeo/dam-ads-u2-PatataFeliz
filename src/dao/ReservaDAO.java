@@ -31,13 +31,14 @@ public class ReservaDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
+                // Corregido para usar las columnas correctas de la BD
                 Reserva r = new Reserva(
                         rs.getString("id_reserva"),
                         rs.getString("id_socio"),
                         rs.getString("id_pista"),
-                        rs.getDate("inicio").toLocalDate(),
-                        rs.getTime("inicio").toLocalTime(),
-                        (int) (rs.getTimestamp("fin").getTime() - rs.getTimestamp("inicio").getTime()) / 60000,
+                        rs.getDate("fecha").toLocalDate(),
+                        rs.getTime("hora_inicio").toLocalTime(),
+                        rs.getInt("duracion_min"),
                         rs.getDouble("precio")
                 );
                 reservas.add(r);
@@ -55,18 +56,26 @@ public class ReservaDAO {
      * @author Luis
      */
     public void crearReservaSP(Reserva reserva) throws SQLException {
-        String sql = "{CALL sp_crear_reserva(?,?,?,?,?)}";
+        // La llamada ahora tiene 7 parámetros para coincidir con tu SP
+        String sql = "{CALL sp_crear_reserva(?,?,?,?,?,?,?)}";
         try (Connection conn = DBConnection.getConnection();
              CallableStatement cs = conn.prepareCall(sql)) {
 
-            cs.setString(1, reserva.getIdPista());
-            cs.setString(2, reserva.getIdSocio());
-            cs.setTimestamp(3, Timestamp.valueOf(reserva.getFecha().atTime(reserva.getHoraInicio())));
-            cs.setTimestamp(4, Timestamp.valueOf(reserva.getFecha().atTime(reserva.getHoraInicio().plusMinutes(reserva.getDuracionMin()))));
-            cs.registerOutParameter(5, Types.DOUBLE);
+            // Asignamos los parámetros EN EL ORDEN CORRECTO
+            cs.setString(1, reserva.getIdReserva());
+            cs.setString(2, reserva.getIdPista());
+            cs.setString(3, reserva.getIdSocio());
+            cs.setDate(4, java.sql.Date.valueOf(reserva.getFecha()));
+            cs.setTime(5, java.sql.Time.valueOf(reserva.getHoraInicio()));
+            cs.setInt(6, reserva.getDuracionMin());
+
+            // Registramos el parámetro de SALIDA (OUT) en la posición 7
+            cs.registerOutParameter(7, Types.DECIMAL);
 
             cs.execute();
-            reserva.setPrecio(cs.getDouble(5));
+
+            // Obtenemos el precio desde el parámetro de salida 7
+            reserva.setPrecio(cs.getDouble(7));
         }
     }
 

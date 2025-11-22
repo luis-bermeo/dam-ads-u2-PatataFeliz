@@ -9,7 +9,7 @@ import javafx.scene.layout.GridPane;
 import java.util.function.Consumer;
 
 public class SocioFormView extends GridPane {
-    public SocioFormView(ClubDeportivo club) {
+    public SocioFormView(ClubDeportivo club, DashboardView dashboardView) {
         setPadding(new Insets(12));
         setHgap(8);
         setVgap(8);
@@ -34,6 +34,7 @@ public class SocioFormView extends GridPane {
             try {
                 club.altaSocio(new Socio(id.getText(), dni.getText(), nombre.getText(), apellidos.getText(), tel.getText(), email.getText()));
                 showInfo("Socio insertado correctametne");
+                dashboardView.refreshData();
             } catch (Exception ex) {
                 showError(ex.getMessage());
             }
