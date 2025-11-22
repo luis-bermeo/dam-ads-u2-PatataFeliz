@@ -9,7 +9,7 @@ import javafx.scene.layout.GridPane;
 import java.util.function.Consumer;
 
 public class PistaFormView extends GridPane {
-    public PistaFormView(ClubDeportivo club) {
+    public PistaFormView(ClubDeportivo club, DashboardView dashboardView) {
         setPadding(new Insets(12));
         setHgap(8); setVgap(8);
 
@@ -27,8 +27,9 @@ public class PistaFormView extends GridPane {
 
         crear.setOnAction(e -> {
             try {
-             //   club.altaPista(new Pista(id.getText(), deporte.getText(), descripcion.getText(), disponible.isSelected()));
-
+                club.altaPista(new Pista(id.getText(), deporte.getText(), descripcion.getText(), disponible.isSelected()));
+                showInfo("Pista insertada correctamente");
+                dashboardView.refreshData();
             } catch (Exception ex) {
                 showError(ex.getMessage());
             }

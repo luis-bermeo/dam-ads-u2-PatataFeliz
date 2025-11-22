@@ -5,23 +5,50 @@ import servicio.ClubDeportivo;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.util.StringConverter;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 
 public class ReservaFormView extends GridPane {
-    public ReservaFormView(ClubDeportivo club) {
+    public ReservaFormView(ClubDeportivo club, DashboardView dashboardView) {
         setPadding(new Insets(12));
         setHgap(8); setVgap(8);
 
         TextField id = new TextField();
         ComboBox<Socio> idSocio = new ComboBox();
         ComboBox<Pista> idPista = new ComboBox();
+
+        try {
+            idSocio.getItems().addAll(club.getSocios());
+            idSocio.setConverter(new StringConverter<Socio>() {
+                @Override
+                public String toString(Socio socio) {
+                    return socio != null ? socio.getNombre() + " (" + socio.getIdSocio() + ")" : "";
+                }
+                @Override
+                public Socio fromString(String string) { return null; }
+            });
+
+            idPista.getItems().addAll(club.getPistas());
+            idPista.setConverter(new StringConverter<Pista>() {
+                @Override
+                public String toString(Pista pista) {
+                    return pista != null ? pista.getDescripcion() + " (" + pista.getIdPista() + ")" : "";
+                }
+                @Override
+                public Pista fromString(String string) { return null; }
+            });
+        } catch (SQLException e) {
+            showError("No se pudieron cargar los datos para el formulario: " + e.getMessage());
+        }
+
+
         DatePicker fecha = new DatePicker(LocalDate.now());
         TextField hora = new TextField("10:00");
         Spinner<Integer> duracion = new Spinner<>(30, 300, 60, 30);
-        TextField precio = new TextField("10.0");
         Button crear = new Button("Reservar");
 
         addRow(0, new Label("idReserva*"), id);
@@ -30,16 +57,21 @@ public class ReservaFormView extends GridPane {
         addRow(3, new Label("Fecha*"), fecha);
         addRow(4, new Label("Hora inicio* (HH:mm)"), hora);
         addRow(5, new Label("Duración (min)"), duracion);
-        addRow(6, new Label("Precio (€)"), precio);
-        add(crear, 1, 7);
+        add(crear, 1, 6);
 
         crear.setOnAction(e -> {
             try {
+                if (idSocio.getValue() == null || idPista.getValue() == null) {
+                    showError("Debe seleccionar un socio y una pista.");
+                    return;
+                }
                 LocalTime t = LocalTime.parse(hora.getText());
 
               Reserva r = new Reserva(id.getText(), idSocio.getValue().getIdSocio(), idPista.getValue().getIdPista(),
-                      fecha.getValue(), t, duracion.getValue(), Double.parseDouble(precio.getText()));
-           //     boolean ok = club.crearReserva(r);
+                      fecha.getValue(), t, duracion.getValue(), 0); // El precio se calcula en la BD
+                club.crearReserva(r);
+                showInfo("Reserva creada correctamente. Precio: " + r.getPrecio() + "€");
+                dashboardView.refreshData();
             } catch (Exception ex) {
                 showError(ex.getMessage());
             }
